@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모둠별 토론자 질의 기록장</title>
+  <!-- Tailwind CSS 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter & Pretendard 느낌 유지 -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex flex-col antialiased">
+
+  <!-- 헤더 -->
+  <header class="bg-white border-b border-stone-200/80 sticky top-0 z-30 no-print">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-extrabold shadow-sm text-lg">
+          💬
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">가치경매 토론 질의 기록장</h1>
+          <p class="text-[11px] text-slate-400">모둠원 간 질의 기록 시스템</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="openTeacherModal()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5">
+          <span>🔒</span>
+          <span>교사 수합 모드</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full space-y-6">
+
+    <!-- STEP 1. 학급 및 모둠 선택 카드 -->
+    <section class="bg-white rounded-2xl shadow-xs border border-stone-200/90 p-4 sm:p-6 no-print">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- 학급 선택 -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5 tracking-wide">
+            1단계. 학급 선택
+          </label>
+          <select id="class-select" onchange="onClassChange()" class="w-full rounded-xl border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-800 focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+            <!-- 동적 생성 -->
+          </select>
+        </div>
+
+        <!-- 모둠 선택 -->
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1.5 tracking-wide">
+            2단계. 모둠 선택
+          </label>
+          <div id="group-buttons" class="grid grid-cols-4 gap-1.5">
+            <!-- 동적 생성 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 선택된 논제 안내 배너 -->
+      <div id="topic-banner" class="mt-4 p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-start gap-2.5 hidden">
+        <span class="text-emerald-600 text-base">📌</span>
+        <div>
+          <p class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">현재 모둠 토론 논제</p>
+          <p id="topic-text" class="text-xs sm:text-sm font-extrabold text-slate-900 mt-0.5"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2. 토론자 선택 및 미등록 학생 추가 -->
+    <section class="bg-white rounded-2xl shadow-xs border border-stone-200/90 p-4 sm:p-5 no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div>
+          <label class="text-xs font-bold text-slate-600 tracking-wide">
+            STEP 2. 질문을 받을 토론자 선택
+          </label>
+          <span class="text-[11px] text-slate-400 block sm:inline sm:ml-2">질문을 기록할 토론자(발표 대상)를 선택하세요.</span>
+        </div>
+        <button type="button" onclick="openAddMemberModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition self-start sm:self-auto">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <span>명단에 없는 친구 추가하기</span>
+        </button>
+      </div>
+      <div id="member-selector-pills" class="flex flex-wrap gap-2">
+        <!-- 동적 렌더링 -->
+      </div>
+    </section>
+
+    <!-- STEP 3. 선택된 토론자 전용 질문 기록 워크스페이스 -->
+    <section id="selected-debater-workspace">
+      <!-- 동적 렌더링 -->
+    </section>
+
+    <!-- STEP 4. 모둠 베스트 토론자 추천 및 투표 -->
+    <section class="bg-white rounded-2xl shadow-xs border border-stone-200/90 p-4 sm:p-6 no-print">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="text-xs font-bold text-slate-700 tracking-wide flex items-center gap-1.5">
+            <span>⭐</span>
+            <span>모둠 베스트 토론자 투표</span>
+          </h3>
+          <p class="text-[11px] text-slate-400">우리 모둠에서 가장 논리적이고 적극적으로 참여한 친구를 한 명 뽑아주세요.</p>
+        </div>
+      </div>
+      <div id="best-debater-container" class="space-y-3">
+        <!-- 동적 렌더링 -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 미등록 학생 추가 모달 -->
+  <div id="add-member-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4 border border-stone-200 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+        <h3 class="text-base font-extrabold text-slate-900">명단에 없는 모둠원 추가하기</h3>
+        <button type="button" onclick="closeAddMemberModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <form onsubmit="handleAddNewMember(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">이름 *</label>
+          <input type="text" id="new-member-name" required placeholder="예: 홍길동" class="w-full rounded-xl border border-stone-300 px-3.5 py-2 text-xs text-slate-800 focus:border-emerald-500 focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">찬반 입장</label>
+            <select id="new-member-stance" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-xs text-slate-800 focus:border-emerald-500 focus:outline-none">
+              <option value="찬성">찬성</option>
+              <option value="반대">반대</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">배정 가치</label>
+            <select id="new-member-val" class="w-full rounded-xl border border-stone-300 px-3 py-2 text-xs text-slate-800 focus:border-emerald-500 focus:outline-none">
+              <option value="공정성">공정성</option>
+              <option value="효율성">효율성</option>
+              <option value="공동체">공동체</option>
+              <option value="자율성">자율성</option>
+              <option value="지속가능성">지속가능성</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3">
+          <button type="button" onclick="closeAddMemberModal()" class="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-bold transition">취소</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">추가하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 교사 수합 모달 (비밀번호 1218) -->
+  <div id="teacher-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-5 border border-stone-200 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+          <span>🔒</span> 교사 수합 대시보드
+        </h3>
+        <button type="button" onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <!-- 비밀번호 입력 화면 -->
+      <div id="teacher-auth-box" class="py-8 text-center space-y-4">
+        <p class="text-xs text-slate-500">교사 전용 수합 기능을 사용하려면 비밀번호를 입력하세요.</p>
+        <div class="flex items-center justify-center gap-2 max-w-xs mx-auto">
+          <input type="password" id="teacher-pwd-input" placeholder="비밀번호 입력 (4자리)" class="w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-xs text-center text-slate-800 focus:border-emerald-500 focus:outline-none" />
+          <button type="button" onclick="verifyTeacherPassword()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 transition">확인</button>
+        </div>
+        <p id="teacher-pwd-error" class="text-[11px] text-rose-600 hidden">비밀번호가 올바르지 않습니다. (힌트: 1218)</p>
+      </div>
+
+      <!-- 인증 후 수합 결과 화면 -->
+      <div id="teacher-content-box" class="space-y-4 flex-1 overflow-y-auto hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h4 class="text-xs font-bold text-slate-700">현재 학급(<span id="teacher-current-class-label"></span>) 모둠별 질의 수합</h4>
+            <p class="text-[11px] text-slate-400">모든 모둠원에게 들어온 질문 내역을 한눈에 확인합니다.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="exportTeacherCsv()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5">
+              <span>📊</span> CSV 다운로드
+            </button>
+            <button type="button" onclick="printTeacherReport()" class="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+              <span>🖨️</span> 인쇄하기
+            </button>
+          </div>
+        </div>
+
+        <div id="teacher-aggregated-view" class="space-y-4">
+          <!-- 동적 렌더링 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <footer class="bg-white border-t border-stone-200/80 py-4 mt-12 text-center text-xs text-slate-400 no-print">
+    <p>가치경매 토론 모둠별 질의 기록 시스템 · 브라우저에 실시간 자동 저장됩니다.</p>
+  </footer>
+
+  <!-- 데이터 및 애플리케이션 로직 -->
+  <script>
+    // 2-1 ~ 2-10 최종 모둠 편성본 명렬표 (통합 문서2.xlsx 기준 반영)
+    const CLASS_DATA = {
+      "2-1": {
+        "oddTopic": "임금수준을 유지한 채 주4일 근무제를 도입해야 한다.",
+        "evenTopic": "촉법소년의 연령을 하향해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"권진경", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"효율성", r2:"40"},
+            {no:19, name:"이해준", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"40", v2:"공동체", r2:"30"},
+            {no:5, name:"김재훈", stance:"찬성", assignedVal:"공정성", v1:"효율성", r1:"35", v2:"공정성", r2:"30"},
+            {no:23, name:"임은찬", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"25"},
+            {no:9, name:"박선우", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공정성", r2:"30"},
+            {no:25, name:"조윤제", stance:"반대", assignedVal:"지속가능성", v1:"지속가능성", r1:"30", v2:"자율성", r2:"24"},
+            {no:13, name:"안현규", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"지속가능성", r2:"25"}
+          ],
+          "홀수2": [
+            {no:3, name:"김서혁", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"55", v2:"효율성", r2:"20"},
+            {no:21, name:"이현호", stance:"찬성", assignedVal:"공정성", v1:"효율성", r1:"35", v2:"공정성", r2:"30"},
+            {no:7, name:"김태성", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:27, name:"서준우", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"지속가능성", r2:"30"},
+            {no:11, name:"박승우", stance:"반대", assignedVal:"공정성", v1:"효율성", r1:"35", v2:"공정성", r2:"25"},
+            {no:17, name:"이윤찬", stance:"반대", assignedVal:"공동체", v1:"공정성", r1:"60", v2:"공동체", r2:"40"}
+          ],
+          "짝수1": [
+            {no:2, name:"김동환", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"65", v2:"공동체", r2:"35"},
+            {no:18, name:"이지호", stance:"찬성", assignedVal:"공정성", v1:"공동체", r1:"80", v2:"공정성", r2:"20"},
+            {no:4, name:"김우진", stance:"찬성", assignedVal:"공정성", v1:"공동체", r1:"55", v2:"공정성", r2:"45"},
+            {no:22, name:"이홍희", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"45", v2:"공동체", r2:"30"},
+            {no:10, name:"박세환", stance:"반대", assignedVal:"효율성", v1:"공정성", r1:"35", v2:"효율성", r2:"25"},
+            {no:28, name:"강문수", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"공동체", r2:"25"},
+            {no:16, name:"이연우", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"35", v2:"공정성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:6, name:"김찬솔", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"공동체", r2:"35"},
+            {no:20, name:"이현", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"공동체", r2:"30"},
+            {no:8, name:"문유준", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"40", v2:"공동체", r2:"35"},
+            {no:26, name:"홍경표", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"70", v2:"공동체", r2:"30"},
+            {no:12, name:"신현각", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"70", v2:"공정성", r2:"20"},
+            {no:14, name:"연제혁", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"공동체", r2:"30"}
+          ]
+        }
+      },
+      "2-2": {
+        "oddTopic": "인기관광지의 방문객 수를 조절하고 입장료를 도입해야 한다.",
+        "evenTopic": "이용객이 적은 마을 노선을 호출형 교통수단으로 전환해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"강승준", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"공동체", r2:"40"},
+            {no:13, name:"송기중", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"40", v2:"공동체", r2:"30"},
+            {no:25, name:"조인성", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"40", v2:"공동체", r2:"30"},
+            {no:11, name:"배승호", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"35", v2:"공동체", r2:"28"},
+            {no:3, name:"김세진", stance:"찬성", assignedVal:"자율성", v1:"공정성", r1:"40", v2:"자율성", r2:"30"},
+            {no:19, name:"이승기", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"60", v2:"지속가능성", r2:"40"}
+          ],
+          "홀수2": [
+            {no:17, name:"윤지후", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"자율성", r2:"40"},
+            {no:7, name:"김재윤", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"효율성", r2:"30"},
+            {no:27, name:"홍종욱", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"35", v2:"공동체", r2:"30"},
+            {no:23, name:"전재형", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"35", v2:"공동체", r2:"30"},
+            {no:21, name:"이채성", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공동체", r2:"25"},
+            {no:9, name:"박재유", stance:"찬성", assignedVal:"자율성", v1:"지속가능성", r1:"40", v2:"자율성", r2:"30"}
+          ],
+          "짝수1": [
+            {no:2, name:"권순원", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:22, name:"이훈희", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"30", v2:"공정성", r2:"22"},
+            {no:16, name:"윤지겸", stance:"반대", assignedVal:"공동체", v1:"공동체", r1:"70", v2:"효율성", r2:"30"},
+            {no:24, name:"정준우", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"40", v2:"지속가능성", r2:"25"},
+            {no:10, name:"박현수", stance:"찬성", assignedVal:"자율성", v1:"효율성", r1:"40", v2:"자율성", r2:"30"},
+            {no:26, name:"조준영", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"공동체", r2:"25"},
+            {no:14, name:"연승원", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:8, name:"남은택", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"90", v2:"공정성", r2:"10"},
+            {no:18, name:"이동준", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"35", v2:"공동체", r2:"30"},
+            {no:4, name:"김영찬", stance:"찬성", assignedVal:"자율성", v1:"효율성", r1:"40", v2:"자율성", r2:"25"},
+            {no:20, name:"이주명", stance:"반대", assignedVal:"공동체", v1:"자율성", r1:"-", v2:"공동체", r2:"-"},
+            {no:6, name:"김재승", stance:"반대", assignedVal:"공동체", v1:"효율성", r1:"40", v2:"공동체", r2:"30"},
+            {no:12, name:"백승현", stance:"찬성", assignedVal:"공정성", v1:"공동체", r1:"-", v2:"공정성", r2:"-"}
+          ]
+        }
+      },
+      "2-3": {
+        "oddTopic": "일회용컵 보증금제를 전국적으로 확대해야 한다.",
+        "evenTopic": "의류재고 폐기에 대한 환경부담금제를 도입해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"김규민", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:19, name:"이우주", stance:"반대", assignedVal:"효율성", v1:"지속가능성", r1:"40", v2:"효율성", r2:"30"},
+            {no:5, name:"김주영", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"45", v2:"공동체", r2:"25"},
+            {no:25, name:"황진석", stance:"반대", assignedVal:"효율성", v1:"지속가능성", r1:"60", v2:"효율성", r2:"40"},
+            {no:7, name:"김형준", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"35", v2:"공정성", r2:"25"},
+            {no:13, name:"엄재진", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"80", v2:"공동체", r2:"20"}
+          ],
+          "홀수2": [
+            {no:3, name:"김시율", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"30", v2:"공정성", r2:"25"},
+            {no:21, name:"정의주", stance:"찬성", assignedVal:"효율성", v1:"지속가능성", r1:"50", v2:"효율성", r2:"30"},
+            {no:9, name:"박윤호", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"40", v2:"공동체", r2:"30"},
+            {no:23, name:"조민국", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"공동체", r2:"25"},
+            {no:11, name:"신동우", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"60", v2:"공정성", r2:"40"},
+            {no:17, name:"이상윤", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"}
+          ],
+          "짝수1": [
+            {no:2, name:"김민찬", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"50", v2:"공동체", r2:"20"},
+            {no:20, name:"이준석", stance:"찬성", assignedVal:"공정성", v1:"지속가능성", r1:"35", v2:"공정성", r2:"25"},
+            {no:8, name:"박세호", stance:"찬성", assignedVal:"공정성", v1:"지속가능성", r1:"40", v2:"공정성", r2:"25"},
+            {no:12, name:"신환", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"공정성", r2:"40"},
+            {no:18, name:"이시환", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공정성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:4, name:"김은율", stance:"찬성", assignedVal:"공정성", v1:"효율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:22, name:"정찬율", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:6, name:"김지환", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"50", v2:"효율성", r2:"25"},
+            {no:10, name:"송시흔", stance:"찬성", assignedVal:"공정성", v1:"지속가능성", r1:"35", v2:"공정성", r2:"30"},
+            {no:16, name:"이도겸", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"70", v2:"효율성", r2:"30"}
+          ]
+        }
+      },
+      "2-4": {
+        "oddTopic": "응급실 이용에 증상의 정도에 따른 본인부담금을 차등적용해야 한다.",
+        "evenTopic": "전기요금을 지역별로 차등분배해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:3, name:"김경민", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"60", v2:"지속가능성", r2:"40"},
+            {no:17, name:"이준호", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"효율성", r2:"40"},
+            {no:5, name:"김승민", stance:"찬성", assignedVal:"공동체", v1:"효율성", r1:"40", v2:"공동체", r2:"25"},
+            {no:7, name:"김태우", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"70", v2:"공동체", r2:"30"},
+            {no:9, name:"박정하", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"35", v2:"효율성", r2:"25"},
+            {no:27, name:"황채연", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"50", v2:"효율성", r2:"30"}
+          ],
+          "홀수2": [
+            {no:11, name:"소중한", stance:"찬성", assignedVal:"공동체", v1:"효율성", r1:"30", v2:"공동체", r2:"25"},
+            {no:21, name:"정예찬", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"70", v2:"지속가능성", r2:"30"},
+            {no:13, name:"양현준", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"50", v2:"효율성", r2:"30"},
+            {no:25, name:"한진혁", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"30", v2:"공정성", r2:"25"},
+            {no:15, name:"유한영", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:19, name:"임규보", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"30", v2:"효율성", r2:"25"}
+          ],
+          "짝수1": [
+            {no:2, name:"김건호", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"65", v2:"지속가능성", r2:"20"},
+            {no:20, name:"전우재", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"공정성", r2:"20"},
+            {no:6, name:"김창민", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"효율성", r2:"30"},
+            {no:10, name:"배영서", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"효율성", r2:"25"},
+            {no:16, name:"이서준", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"30", v2:"효율성", r2:"25"}
+          ],
+          "짝수2": [
+            {no:4, name:"김명관", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:22, name:"정종현", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"효율성", r2:"30"},
+            {no:8, name:"김택연", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"효율성", r2:"30"},
+            {no:24, name:"조해영", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"40", v2:"효율성", r2:"35"},
+            {no:14, name:"오승민", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"35", v2:"지속가능성", r2:"25"},
+            {no:18, name:"임관영", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"65", v2:"자율성", r2:"45"}
+          ]
+        }
+      },
+      "2-5": {
+        "oddTopic": "노키즈존은 영업의 자유로 인정해야 한다.",
+        "evenTopic": "학교상담과 진로설계에 AI시스템을 도입해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"구효찬", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"70", v2:"효율성", r2:"20"},
+            {no:19, name:"이희우", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"80", v2:"공동체", r2:"20"},
+            {no:3, name:"권영우", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"70", v2:"효율성", r2:"20"},
+            {no:21, name:"조민규", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"80", v2:"공정성", r2:"8"},
+            {no:15, name:"윤지후", stance:"찬성", assignedVal:"공정성", v1:"자율성", r1:"60", v2:"공정성", r2:"40"},
+            {no:25, name:"최진수", stance:"반대", assignedVal:"효율성", v1:"자율성", r1:"60", v2:"효율성", r2:"40"},
+            {no:17, name:"이우주", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"40", v2:"공정성", r2:"30"}
+          ],
+          "홀수2": [
+            {no:5, name:"김병준", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"70", v2:"공정성", r2:"10"},
+            {no:23, name:"최성율", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"95", v2:"공동체", r2:"5"},
+            {no:7, name:"김지후", stance:"찬성", assignedVal:"공동체", v1:"자율성", r1:"60", v2:"공동체", r2:"40"},
+            {no:27, name:"황성진", stance:"반대", assignedVal:"공동체", v1:"공동체", r1:"75", v2:"효율성", r2:"25"},
+            {no:9, name:"김한솔", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"90", v2:"효율성", r2:"10"},
+            {no:11, name:"박호정", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"80", v2:"효율성", r2:"20"},
+            {no:13, name:"오윤성", stance:"찬성", assignedVal:"효율성", v1:"자율성", r1:"60", v2:"효율성", r2:"40"}
+          ],
+          "짝수1": [
+            {no:2, name:"권순도", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"자율성", r2:"40"},
+            {no:22, name:"차수호", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"효율성", r2:"40"},
+            {no:4, name:"김남경", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"자율성", r2:"30"},
+            {no:26, name:"최현진", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:6, name:"김윤섭", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:8, name:"김찬수", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"공정성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:14, name:"윤남영", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"효율성", r2:"40"},
+            {no:16, name:"이동건", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"35", v2:"자율성", r2:"25"},
+            {no:18, name:"이재현", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"자율성", r2:"25"},
+            {no:24, name:"최우성", stance:"반대", assignedVal:"지속가능성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:10, name:"김환희", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"35", v2:"효율성", r2:"30"},
+            {no:12, name:"양태겸", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"35", v2:"공동체", r2:"30"}
+          ]
+        }
+      },
+      "2-6": {
+        "oddTopic": "도심에서 완전 자율주행 택시 운행을 허용해야 한다.",
+        "evenTopic": "청년에게 정기적으로 지원금을 지급하는 제도를 도입해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"PATINO HANNAH", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:17, name:"이주아", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"35", v2:"효율성", r2:"25"},
+            {no:3, name:"강민지", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"35", v2:"공동체", r2:"30"},
+            {no:19, name:"이현지", stance:"찬성", assignedVal:"공정성", v1:"공동체", r1:"40", v2:"공정성", r2:"30"},
+            {no:5, name:"김서연", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"40", v2:"공정성", r2:"25"},
+            {no:13, name:"유효진", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"40", v2:"공정성", r2:"25"}
+          ],
+          "홀수2": [
+            {no:7, name:"노정윤", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"50", v2:"공정성", r2:"30"},
+            {no:21, name:"전채원", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:9, name:"류채민", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"35", v2:"공동체", r2:"30"},
+            {no:23, name:"정효진", stance:"반대", assignedVal:"공동체", v1:"공동체", r1:"50", v2:"공정성", r2:"30"},
+            {no:11, name:"송서연", stance:"찬성", assignedVal:"지속가능성", v1:"공동체", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:25, name:"최지유", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"공동체", r2:"40"},
+            {no:15, name:"윤예은", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"40", v2:"지속가능성", r2:"25"}
+          ],
+          "짝수1": [
+            {no:2, name:"강다현", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:26, name:"한지유", stance:"반대", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공정성", r2:"30"},
+            {no:8, name:"노하윤", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"45", v2:"공정성", r2:"35"},
+            {no:12, name:"왕소현", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"공정성", r2:"40"},
+            {no:16, name:"윤지서", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"50", v2:"효율성", r2:"40"},
+            {no:18, name:"임나연", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"40", v2:"공정성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:10, name:"송다예", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"자율성", r2:"25"},
+            {no:14, name:"윤다인", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"30", v2:"공정성", r2:"25"},
+            {no:20, name:"장영나", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"25"},
+            {no:22, name:"정혜인", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"자율성", r2:"20"}
+          ]
+        }
+      },
+      "2-7": {
+        "oddTopic": "콘텐츠 추천 알고리즘을 기본 설정으로 제공하는 것은 바람직하다",
+        "evenTopic": "자율주행자동차 사고의 책임은 제조사가 져야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"강세은", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"60", v2:"공정성", r2:"30"},
+            {no:17, name:"이정원", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"30", v2:"자율성", r2:"25"},
+            {no:3, name:"김가령", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"70", v2:"효율성", r2:"30"},
+            {no:19, name:"이채원", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:9, name:"박수빈", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"35", v2:"자율성", r2:"30"},
+            {no:11, name:"안지우", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"효율성", r2:"40"}
+          ],
+          "홀수2": [
+            {no:5, name:"김예은", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"자율성", r2:"40"},
+            {no:21, name:"정재은", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"효율성", r2:"30"},
+            {no:7, name:"남소연", stance:"찬성", assignedVal:"공정성", v1:"자율성", r1:"50", v2:"공정성", r2:"30"},
+            {no:23, name:"차비원", stance:"반대", assignedVal:"공정성", v1:"자율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:13, name:"원예지", stance:"찬성", assignedVal:"자율성", v1:"효율성", r1:"40", v2:"자율성", r2:"35"},
+            {no:25, name:"한수연", stance:"반대", assignedVal:"공동체", v1:"자율성", r1:"50", v2:"공동체", r2:"30"},
+            {no:15, name:"유태연", stance:"찬성", assignedVal:"자율성", v1:"효율성", r1:"40", v2:"자율성", r2:"30"}
+          ],
+          "짝수1": [
+            {no:2, name:"권기리", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"50", v2:"효율성", r2:"30"},
+            {no:16, name:"이서하", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"60", v2:"공정성", r2:"40"},
+            {no:4, name:"김다흰", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"50", v2:"공동체", r2:"30"},
+            {no:24, name:"최효정", stance:"반대", assignedVal:"지속가능성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:10, name:"박은빈", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"60", v2:"공동체", r2:"40"},
+            {no:12, name:"안지혜", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"50", v2:"공동체", r2:"35"}
+          ],
+          "짝수2": [
+            {no:6, name:"김예진", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"공동체", r2:"40"},
+            {no:20, name:"전지유", stance:"찬성", assignedVal:"지속가능성", v1:"공정성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:8, name:"박서현", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"공동체", r2:"40"},
+            {no:22, name:"정채은", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"50", v2:"효율성", r2:"30"},
+            {no:14, name:"원채은", stance:"반대", assignedVal:"공동체", v1:"공정성", r1:"40", v2:"공동체", r2:"30"},
+            {no:18, name:"이지현", stance:"반대", assignedVal:"공동체", v1:"공동체", r1:"60", v2:"공정성", r2:"30"}
+          ]
+        }
+      },
+      "2-8": {
+        "oddTopic": "과제에 생성형 AI를 활용하되 활동과정을 기록해 제출하는 방식을 인정해야 한다.",
+        "evenTopic": "마을주차 공간 일부를 공유텃밭과 쉼터로 바꾸어야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"강봄", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"공정성", r2:"30"},
+            {no:5, name:"김영원", stance:"찬성", assignedVal:"지속가능성", v1:"공정성", r1:"60", v2:"지속가능성", r2:"40"},
+            {no:13, name:"안선아", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"45", v2:"효율성", r2:"40"},
+            {no:19, name:"임서진", stance:"반대", assignedVal:"공동체", v1:"공정성", r1:"50", v2:"공동체", r2:"20"},
+            {no:9, name:"박나경", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"-", v2:"공동체", r2:"-"},
+            {no:21, name:"정다해", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"35", v2:"공정성", r2:"30"}
+          ],
+          "홀수2": [
+            {no:7, name:"김희윤", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"50", v2:"자율성", r2:"30"},
+            {no:23, name:"조소연", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"50", v2:"공동체", r2:"30"},
+            {no:11, name:"서문지우", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"35", v2:"효율성", r2:"25"},
+            {no:25, name:"최윤제", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"공정성", r2:"30"},
+            {no:15, name:"이지민", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"지속가능성", r2:"25"},
+            {no:17, name:"이효민", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"지속가능성", r2:"30"}
+          ],
+          "짝수1": [
+            {no:2, name:"강하은", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:26, name:"한민주", stance:"반대", assignedVal:"공정성", v1:"효율성", r1:"60", v2:"공정성", r2:"30"},
+            {no:8, name:"나유진", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"공정성", r2:"30"},
+            {no:16, name:"이채은", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"70", v2:"자율성", r2:"30"}
+          ],
+          "짝수2": [
+            {no:22, name:"정현진", stance:"찬성", assignedVal:"지속가능성", v1:"공동체", r1:"40", v2:"지속가능성", r2:"25"},
+            {no:10, name:"박찬유", stance:"찬성", assignedVal:"자율성", v1:"효율성", r1:"-", v2:"자율성", r2:"-"},
+            {no:12, name:"서지은", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"공정성", r2:"20"},
+            {no:14, name:"이다영", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"-", v2:"자율성", r2:"-"},
+            {no:24, name:"조제인", stance:"반대", assignedVal:"공정성", v1:"효율성", r1:"30", v2:"공정성", r2:"25"}
+          ]
+        }
+      },
+      "2-9": {
+        "oddTopic": "오래된 전통시장을 철거하고 복합쇼핑몰과 주거단지로 재개발해야 한다.",
+        "evenTopic": "멸종위기종 보호를 위해 일부 등산로와 낚시터의 이용을 제한해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"김나연", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"효율성", r2:"30"},
+            {no:3, name:"김민서", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"55", v2:"자율성", r2:"25"},
+            {no:7, name:"김이현", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"50", v2:"공정성", r2:"30"},
+            {no:19, name:"이민주", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공동체", r2:"30"},
+            {no:11, name:"박세현", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"60", v2:"공정성", r2:"40"},
+            {no:21, name:"이지현", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"60", v2:"공정성", r2:"40"},
+            {no:17, name:"유주은", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"공동체", r2:"30"}
+          ],
+          "홀수2": [
+            {no:4, name:"김설아", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"70", v2:"지속가능성", r2:"30"},
+            {no:15, name:"박주현", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"효율성", r2:"25"},
+            {no:5, name:"김유주", stance:"찬성", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"},
+            {no:23, name:"한다은", stance:"반대", assignedVal:"공동체", v1:"공동체", r1:"60", v2:"공정성", r2:"40"},
+            {no:9, name:"노현지", stance:"찬성", assignedVal:"공동체", v1:"공동체", r1:"50", v2:"공정성", r2:"40"},
+            {no:25, name:"홍라희", stance:"반대", assignedVal:"공정성", v1:"공정성", r1:"40", v2:"지속가능성", r2:"30"},
+            {no:13, name:"박시현", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"40", v2:"공동체", r2:"30"}
+          ],
+          "짝수1": [
+            {no:2, name:"김명주", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"40", v2:"공동체", r2:"25"},
+            {no:24, name:"현지원", stance:"반대", assignedVal:"공동체", v1:"지속가능성", r1:"40", v2:"공동체", r2:"30"},
+            {no:12, name:"박송연", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"80", v2:"공동체", r2:"20"},
+            {no:14, name:"박예린", stance:"반대", assignedVal:"효율성", v1:"지속가능성", r1:"60", v2:"효율성", r2:"40"},
+            {no:16, name:"우희율", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"70", v2:"공동체", r2:"30"},
+            {no:10, name:"박서연", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"50", v2:"공동체", r2:"30"}
+          ],
+          "짝수2": [
+            {no:6, name:"김윤아", stance:"찬성", assignedVal:"지속가능성", v1:"지속가능성", r1:"70", v2:"공동체", r2:"30"},
+            {no:20, name:"이윤아", stance:"찬성", assignedVal:"효율성", v1:"지속가능성", r1:"40", v2:"효율성", r2:"30"},
+            {no:18, name:"이다연", stance:"반대", assignedVal:"지속가능성", v1:"지속가능성", r1:"70", v2:"공동체", r2:"30"},
+            {no:8, name:"김지수", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"50", v2:"공동체", r2:"30"},
+            {no:22, name:"임예서", stance:"찬성", assignedVal:"공동체", v1:"지속가능성", r1:"40", v2:"공동체", r2:"25"}
+          ]
+        }
+      },
+      "2-10": {
+        "oddTopic": "대학입학전형에서 학교 밖 활동포트폴리오의 비중을 확대해야 한다",
+        "evenTopic": "폭염시기에 전력절약을 위해 냉방사용시간대를 조절해야 한다.",
+        "groups": {
+          "홀수1": [
+            {no:1, name:"강다연", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"60", v2:"효율성", r2:"40"},
+            {no:19, name:"전지원", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"60", v2:"공동체", r2:"40"},
+            {no:5, name:"김래인", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"공동체", r2:"30"},
+            {no:21, name:"조수빈", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"50", v2:"공동체", r2:"20"},
+            {no:7, name:"김민채", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"40", v2:"효율성", r2:"20"},
+            {no:25, name:"하지후", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:13, name:"남재연", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"공동체", r2:"40"}
+          ],
+          "홀수2": [
+            {no:3, name:"강하린", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"60", v2:"효율성", r2:"20"},
+            {no:17, name:"이예림", stance:"찬성", assignedVal:"자율성", v1:"공정성", r1:"50", v2:"자율성", r2:"30"},
+            {no:9, name:"김서율", stance:"찬성", assignedVal:"지속가능성", v1:"자율성", r1:"50", v2:"지속가능성", r2:"20"},
+            {no:23, name:"최지아", stance:"반대", assignedVal:"자율성", v1:"공정성", r1:"30", v2:"자율성", r2:"25"},
+            {no:11, name:"김채민", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"70", v2:"효율성", r2:"30"},
+            {no:27, name:"황채영", stance:"반대", assignedVal:"공동체", v1:"공정성", r1:"40", v2:"공동체", r2:"30"},
+            {no:15, name:"송시효", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"40", v2:"공동체", r2:"20"}
+          ],
+          "짝수1": [
+            {no:4, name:"공예은", stance:"찬성", assignedVal:"자율성", v1:"자율성", r1:"40", v2:"효율성", r2:"25"},
+            {no:12, name:"김효인", stance:"찬성", assignedVal:"공동체", v1:"공정성", r1:"40", v2:"공동체", r2:"30"},
+            {no:6, name:"김민서", stance:"찬성", assignedVal:"공정성", v1:"자율성", r1:"40", v2:"공정성", r2:"30"},
+            {no:24, name:"최진서", stance:"반대", assignedVal:"효율성", v1:"효율성", r1:"50", v2:"공정성", r2:"25"},
+            {no:14, name:"박율희", stance:"반대", assignedVal:"지속가능성", v1:"효율성", r1:"30", v2:"지속가능성", r2:"25"}
+          ],
+          "짝수2": [
+            {no:22, name:"진보람", stance:"찬성", assignedVal:"공정성", v1:"공정성", r1:"35", v2:"공동체", r2:"30"},
+            {no:16, name:"양유진", stance:"찬성", assignedVal:"공동체", v1:"자율성", r1:"50", v2:"공동체", r2:"20"},
+            {no:10, name:"김주하", stance:"찬성", assignedVal:"효율성", v1:"공정성", r1:"60", v2:"효율성", r2:"40"},
+            {no:26, name:"홍지인", stance:"반대", assignedVal:"자율성", v1:"자율성", r1:"50", v2:"효율성", r2:"20"},
+            {no:20, name:"정혜은", stance:"찬성", assignedVal:"지속가능성", v1:"효율성", r1:"50", v2:"지속가능성", r2:"30"}
+          ]
+        }
+      }
+    };
+
+    // 로컬 상태 관리
+    let state = {
+      className: "2-1",
+      groupKey: "홀수1",
+      selectedMemberName: "",
+      editingQaId: null
+    };
+
+    // 저장소 키 생성 (최종 편성본 버전 v2로 분리하여 기존 캐시 충돌 방지)
+    function getStorageKey() {
+      return `debate_qa_final_${state.className}_${state.groupKey}`;
+    }
+
+    // 데이터 로드
+    function loadGroupData() {
+      const raw = localStorage.getItem(getStorageKey());
+      if (raw) {
+        try { 
+          const parsed = JSON.parse(raw);
+          if (!parsed.votes) parsed.votes = {};
+          return parsed;
+        } catch (e) { }
+      }
+      const baseGroup = CLASS_DATA[state.className].groups[state.groupKey] || [];
+      let initialMap = {};
+      baseGroup.forEach(m => { initialMap[m.name] = []; });
+      return { members: JSON.parse(JSON.stringify(baseGroup)), qaMap: initialMap, votes: {} };
+    }
+
+    function saveGroupData(data) {
+      localStorage.setItem(getStorageKey(), JSON.stringify(data));
+    }
+
+    // 초기화 및 이벤트 바인딩
+    window.addEventListener("DOMContentLoaded", () => {
+      initClassSelect();
+      renderGroupButtons();
+      loadAndRender();
+    });
+
+    function initClassSelect() {
+      const select = document.getElementById("class-select");
+      select.innerHTML = Object.keys(CLASS_DATA).map(cls => `<option value="${cls}">2학년 ${cls.split('-')[1]}반</option>`).join("");
+      select.value = state.className;
+    }
+
+    function onClassChange() {
+      state.className = document.getElementById("class-select").value;
+      // 해당 학급의 첫번째 모둠으로 자동 설정
+      const groups = Object.keys(CLASS_DATA[state.className].groups);
+      state.groupKey = groups[0];
+      renderGroupButtons();
+      loadAndRender();
+    }
+
+    function selectGroup(gKey) {
+      state.groupKey = gKey;
+      state.selectedMemberName = "";
+      state.editingQaId = null;
+      renderGroupButtons();
+      loadAndRender();
+    }
+
+    function renderGroupButtons() {
+      const groups = Object.keys(CLASS_DATA[state.className].groups);
+      const container = document.getElementById("group-buttons");
+      container.innerHTML = groups.map(g => {
+        const isActive = g === state.groupKey;
+        const btnClass = isActive 
+          ? "bg-slate-900 text-white shadow-xs font-extrabold" 
+          : "bg-stone-100 hover:bg-stone-200 text-slate-700 font-bold";
+        return `<button type="button" onclick="selectGroup('${g}')" class="px-2.5 py-2 rounded-xl text-xs transition ${btnClass}">${g}</button>`;
+      }).join("");
+    }
+
+    function loadAndRender() {
+      const classInfo = CLASS_DATA[state.className];
+      const isOdd = state.groupKey.startsWith("홀수");
+      const currentTopic = isOdd ? classInfo.oddTopic : classInfo.evenTopic;
+      const banner = document.getElementById("topic-banner");
+      const topicText = document.getElementById("topic-text");
+      if (currentTopic) {
+        topicText.textContent = currentTopic;
+        banner.classList.remove("hidden");
+      } else {
+        banner.classList.add("hidden");
+      }
+
+      const data = loadGroupData();
+      if (!state.selectedMemberName || !data.members.some(m => m.name === state.selectedMemberName)) {
+        state.selectedMemberName = data.members.length > 0 ? data.members[0].name : "";
+      }
+
+      renderMemberPills(data);
+      renderWorkspace(data);
+      renderBestDebaterSection(data);
+    }
+
+    function renderMemberPills(data) {
+      const container = document.getElementById("member-selector-pills");
+      if (data.members.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 py-1">등록된 모둠원이 없습니다. 우측 상단 버튼을 눌러 추가하세요.</p>`;
+        return;
+      }
+
+      container.innerHTML = data.members.map(m => {
+        const isSelected = m.name === state.selectedMemberName;
+        const pillClass = isSelected
+          ? "bg-emerald-600 text-white shadow-xs border-emerald-600 font-extrabold scale-[1.02]"
+          : "bg-stone-100 hover:bg-stone-200 text-slate-700 border-stone-200 font-bold";
+        
+        const qaCount = (data.qaMap[m.name] || []).length;
+        return `
+          <button type="button" onclick="selectMember('${m.name}')" class="px-3.5 py-2 rounded-xl text-xs border transition flex items-center gap-1.5 ${pillClass}">
+            <span>${m.name}</span>
+            <span class="px-1.5 py-0.2 rounded-md bg-white/20 text-[10px]">${qaCount}건</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectMember(name) {
+      state.selectedMemberName = name;
+      state.editingQaId = null;
+      loadAndRender();
+    }
+
+    // 미등록 친구 추가 모달 제어
+    function openAddMemberModal() {
+      document.getElementById("add-member-modal").classList.remove("hidden");
+      document.getElementById("new-member-name").value = "";
+    }
+    function closeAddMemberModal() {
+      document.getElementById("add-member-modal").classList.add("hidden");
+    }
+
+    function handleAddNewMember(event) {
+      event.preventDefault();
+      const name = document.getElementById("new-member-name").value.trim();
+      const stance = document.getElementById("new-member-stance").value;
+      const assignedVal = document.getElementById("new-member-val").value;
+      if (!name) return;
+
+      const data = loadGroupData();
+      if (data.members.some(m => m.name === name)) {
+        alert("이미 존재하는 이름입니다.");
+        return;
+      }
+
+      data.members.push({
+        no: null,
+        name: name,
+        stance: stance,
+        assignedVal: assignedVal,
+        v1: assignedVal,
+        r1: "-",
+        v2: "-",
+        r2: "-"
+      });
+      if (!data.qaMap[name]) data.qaMap[name] = [];
+      saveGroupData(data);
+
+      closeAddMemberModal();
+      state.selectedMemberName = name;
+      loadAndRender();
+    }
+
+    // 워크스페이스 렌더링 (질문 기록 전용 - 답변 칸 제거됨)
+    function renderWorkspace(data) {
+      const container = document.getElementById("selected-debater-workspace");
+      const member = data.members.find(m => m.name === state.selectedMemberName);
+
+      if (!member) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-stone-400 text-xs border border-stone-200">선택된 토론자가 없습니다.</div>`;
+        return;
+      }
+
+      // 이전/다음 토론자 인덱스 계산
+      const currentIndex = data.members.findIndex(m => m.name === member.name);
+      const prevIdx = (currentIndex - 1 + data.members.length) % data.members.length;
+      const nextIdx = (currentIndex + 1) % data.members.length;
+
+      // 질의자 목록 (본인 제외 모둠원)
+      const otherMembers = data.members.filter(m => m.name !== member.name);
+      const qaList = data.qaMap[member.name] || [];
+
+      // 가치별 스타일 매핑
+      const valStyles = {
+        "공정성": { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200", dot: "bg-amber-500" },
+        "효율성": { bg: "bg-sky-50", text: "text-sky-800", border: "border-sky-200", dot: "bg-sky-500" },
+        "공동체": { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200", dot: "bg-emerald-500" },
+        "자율성": { bg: "bg-purple-50", text: "text-purple-800", border: "border-purple-200", dot: "bg-purple-500" },
+        "지속가능성": { bg: "bg-rose-50", text: "text-rose-800", border: "border-rose-200", dot: "bg-rose-500" }
+      };
+      const valStyle = valStyles[member.assignedVal] || { bg: "bg-stone-50", text: "text-stone-800", border: "border-stone-200", dot: "bg-stone-500" };
+      const stanceBadge = member.stance === "찬성" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200";
+
+      container.innerHTML = `
+        <article class="bg-white rounded-2xl shadow-xs border border-stone-200 p-5 sm:p-6 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
+            <div class="flex items-start sm:items-center gap-3">
+              <span class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 text-white text-base font-extrabold flex items-center justify-center shadow-2xs shrink-0">
+                ${member.no || "+"}
+              </span>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="text-xl font-extrabold text-slate-900">${member.name}</h3>
+                  <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold border ${stanceBadge}">
+                    ${member.stance} 입장
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold border ${valStyle.bg} ${valStyle.text} ${valStyle.border}">
+                    <span class="w-1.5 h-1.5 rounded-full ${valStyle.dot}"></span>
+                    배정 가치: ${member.assignedVal}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                  우선가치(1순위): <strong class="text-slate-700">${member.v1 || "-"}</strong> (${member.r1}%) · 차선가치(2순위): <strong class="text-slate-700">${member.v2 || "-"}</strong> (${member.r2}%)
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 no-print self-end sm:self-center">
+              <button type="button" onclick="selectMember('${data.members[prevIdx].name}')" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-bold transition">
+                ← 이전 (${data.members[prevIdx].name})
+              </button>
+              <button type="button" onclick="selectMember('${data.members[nextIdx].name}')" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-bold transition">
+                다음 (${data.members[nextIdx].name}) →
+              </button>
+            </div>
+          </div>
+
+          <!-- 질문 기록 입력 폼 (답변 칸 없음) -->
+          <div class="bg-stone-50/80 rounded-2xl p-4 sm:p-5 border border-stone-200/80 no-print">
+            <h4 class="text-xs font-extrabold text-slate-700 mb-3 flex items-center gap-1.5">
+              <span>✍️</span>
+              <span>${state.editingQaId ? '질문 수정하기' : `${member.name} 학생에게 보낼 질문 기록하기`}</span>
+            </h4>
+
+            <form onsubmit="handleQaSubmit(event, '${member.name}')" class="space-y-3.5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">질문한 친구 (질의자) *</label>
+                  <select id="qa-questioner" required class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs font-bold text-slate-800 focus:border-emerald-500 focus:outline-none">
+                    <option value="">-- 질의자 선택 --</option>
+                    ${otherMembers.map(m => `<option value="${m.name}">${m.name} (${m.assignedVal})</option>`).join("")}
+                    <option value="모둠 전체(공동)">모둠 전체 (공동)</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">질문 내용 (Q) *</label>
+                  <input type="text" id="qa-question" required placeholder="예: 해당 가치를 선택했을 때 예상되는 부작용은 무엇인가요?"
+                    class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-xs text-slate-800 focus:border-emerald-500 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-1">
+                ${state.editingQaId ? `
+                  <button type="button" onclick="cancelEditQa()" class="px-4 py-2 rounded-xl bg-stone-200 hover:bg-stone-300 text-slate-700 text-xs font-bold transition">취소</button>
+                ` : ''}
+                <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-2xs">
+                  ${state.editingQaId ? '수정 완료' : '질문 기록 저장'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 누적된 질문 목록 -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-bold text-slate-600 tracking-wide">
+              ${member.name} 학생에게 들어온 질문 목록 (<span class="text-emerald-700 font-extrabold">${qaList.length}건</span>)
+            </h4>
+
+            ${qaList.length === 0 ? `
+              <div class="bg-stone-50 rounded-xl p-6 text-center text-stone-400 text-xs border border-stone-200/60">
+                아직 기록된 질문이 없습니다. 위 폼을 통해 질문을 기록해주세요.
+              </div>
+            ` : qaList.map(qa => `
+              <div class="bg-stone-50 rounded-xl p-4 border border-stone-200/80 space-y-2 relative group">
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800">
+                    질문자: ${qa.questionerName}
+                  </span>
+                  <div class="flex items-center gap-1 no-print">
+                    <button type="button" onclick="startEditQa(${qa.id})" class="px-2.5 py-1 rounded-lg bg-stone-200 hover:bg-stone-300 text-slate-700 text-[11px] font-bold transition">수정</button>
+                    <button type="button" onclick="deleteQa(${qa.id}, '${member.name}')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-bold transition">삭제</button>
+                  </div>
+                </div>
+                <div class="text-xs font-medium text-slate-900 bg-white p-3 rounded-xl border border-stone-200/60">
+                  <strong class="text-emerald-700">Q.</strong> ${qa.question}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `;
+    }
+
+    function handleQaSubmit(event, debaterName) {
+      event.preventDefault();
+      const questionerName = document.getElementById("qa-questioner").value;
+      const question = document.getElementById("qa-question").value.trim();
+      if (!questionerName || !question) return;
+
+      const data = loadGroupData();
+      if (!data.qaMap[debaterName]) data.qaMap[debaterName] = [];
+
+      if (state.editingQaId) {
+        const item = data.qaMap[debaterName].find(q => q.id === state.editingQaId);
+        if (item) {
+          item.questionerName = questionerName;
+          item.question = question;
+        }
+        state.editingQaId = null;
+      } else {
+        data.qaMap[debaterName].push({
+          id: Date.now(),
+          questionerName,
+          question
+        });
+      }
+
+      saveGroupData(data);
+      loadAndRender();
+    }
+
+    function renderBestDebaterSection(data) {
+      const container = document.getElementById("best-debater-container");
+      if (data.members.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400">모둠원이 없습니다.</p>`;
+        return;
+      }
+
+      // 투표 집계 (votes 객체: { voterName: nomineeName })
+      const voteCounts = {};
+      data.members.forEach(m => { voteCounts[m.name] = 0; });
+      Object.values(data.votes || {}).forEach(nominee => {
+        if (voteCounts[nominee] !== undefined) voteCounts[nominee]++;
+      });
+
+      // 투표자 선택 드롭다운용 및 카드 목록
+      const myVoterName = localStorage.getItem(`voter_${state.className}_${state.groupKey}`) || "";
+
+      container.innerHTML = `
+        <div class="bg-stone-50/80 rounded-xl p-4 border border-stone-200/80 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="text-xs font-bold text-slate-700">
+              투표 참여자 설정: 
+              <select id="voter-name-select" onchange="changeVoterName(this.value)" class="ml-2 rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500">
+                <option value="">-- 내 이름 선택 --</option>
+                ${data.members.map(m => `<option value="${m.name}" ${myVoterName === m.name ? 'selected' : ''}>${m.name}</option>`).join("")}
+              </select>
+            </div>
+            <div class="text-[11px] text-emerald-700 font-bold">
+              💡 내 이름을 먼저 선택한 후 아래에서 베스트 토론자를 투표하세요!
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+            ${data.members.map(m => {
+              const isMyVote = data.votes && data.votes[myVoterName] === m.name;
+              const count = voteCounts[m.name] || 0;
+              return `
+                <div class="bg-white rounded-xl p-3.5 border ${isMyVote ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20' : 'border-stone-200'} flex items-center justify-between transition">
+                  <div>
+                    <div class="text-xs font-extrabold text-slate-900">${m.name}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">득표수: <strong class="text-emerald-700 font-bold">${count}표</strong></div>
+                  </div>
+                  <button type="button" onclick="castVote('${m.name}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${isMyVote ? 'bg-emerald-600 text-white shadow-xs' : 'bg-stone-100 hover:bg-stone-200 text-slate-700'}">
+                    ${isMyVote ? '투표완료 ✓' : '추천하기'}
+                  </button>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function changeVoterName(name) {
+      localStorage.setItem(`voter_${state.className}_${state.groupKey}`, name);
+      loadAndRender();
+    }
+
+    function castVote(nomineeName) {
+      const myVoterName = localStorage.getItem(`voter_${state.className}_${state.groupKey}`);
+      if (!myVoterName) {
+        alert("먼저 상단에서 [내 이름]을 선택해주세요!");
+        return;
+      }
+      const data = loadGroupData();
+      if (!data.votes) data.votes = {};
+      data.votes[myVoterName] = nomineeName;
+      saveGroupData(data);
+      loadAndRender();
+    }
+
+    function startEditQa(qaId) {
+      state.editingQaId = qaId;
+      const data = loadGroupData();
+      renderWorkspace(data);
+    }
+
+    function cancelEditQa() {
+      state.editingQaId = null;
+      const data = loadGroupData();
+      renderWorkspace(data);
+    }
+
+    function deleteQa(qaId, debaterName) {
+      if (!confirm("이 질문 기록을 삭제하시겠습니까?")) return;
+      const data = loadGroupData();
+      data.qaMap[debaterName] = (data.qaMap[debaterName] || []).filter(q => q.id !== qaId);
+      saveGroupData(data);
+      loadAndRender();
+    }
+
+    // 교사 수합 모달 제어 (비밀번호 1218)
+    function openTeacherModal() {
+      document.getElementById("teacher-modal").classList.remove("hidden");
+      document.getElementById("teacher-pwd-input").value = "";
+      document.getElementById("teacher-pwd-error").classList.add("hidden");
+      document.getElementById("teacher-auth-box").classList.remove("hidden");
+      document.getElementById("teacher-content-box").classList.add("hidden");
+    }
+
+    function closeTeacherModal() {
+      document.getElementById("teacher-modal").classList.add("hidden");
+    }
+
+    function verifyTeacherPassword() {
+      const pwd = document.getElementById("teacher-pwd-input").value;
+      if (pwd === "1218") {
+        document.getElementById("teacher-auth-box").classList.add("hidden");
+        document.getElementById("teacher-content-box").classList.remove("hidden");
+        renderTeacherAggregatedData();
+      } else {
+        document.getElementById("teacher-pwd-error").classList.remove("hidden");
+      }
+    }
+
+    function renderTeacherAggregatedData() {
+      document.getElementById("teacher-current-class-label").textContent = `2학년 ${state.className.split('-')[1]}반`;
+      const container = document.getElementById("teacher-aggregated-view");
+      const classGroups = CLASS_DATA[state.className].groups;
+
+      let html = "";
+      Object.keys(classGroups).forEach(gKey => {
+        // 최종 편성본 저장소 데이터 로드
+        const storageKey = `debate_qa_final_${state.className}_${gKey}`;
+        const raw = localStorage.getItem(storageKey);
+        let gData = raw ? JSON.parse(raw) : { members: classGroups[gKey], qaMap: {}, votes: {} };
+
+        // 모둠별 베스트 토론자 득표 집계
+        const voteCounts = {};
+        gData.members.forEach(m => { voteCounts[m.name] = 0; });
+        Object.values(gData.votes || {}).forEach(nominee => {
+          if (voteCounts[nominee] !== undefined) voteCounts[nominee]++;
+        });
+        const maxVotes = Math.max(0, ...Object.values(voteCounts));
+        const bestDebaters = maxVotes > 0 
+          ? Object.keys(voteCounts).filter(name => voteCounts[name] === maxVotes).map(name => `${name}(${maxVotes}표)`).join(", ")
+          : "미투표";
+
+        html += `
+          <div class="bg-stone-50 rounded-2xl p-4 border border-stone-200/80 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <h5 class="text-xs font-extrabold text-slate-800 tracking-wide">
+                <span>📌 모둠: ${gKey}</span>
+              </h5>
+              <span class="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-lg self-start sm:self-auto">
+                ⭐ 베스트 토론자: ${bestDebaters}
+              </span>
+            </div>
+            <div class="space-y-2">
+        `;
+
+        gData.members.forEach(m => {
+          const list = (gData.qaMap && gData.qaMap[m.name]) || [];
+          const myVotes = voteCounts[m.name] || 0;
+          html += `
+            <div class="bg-white rounded-xl p-3 border border-stone-200/60 text-xs space-y-1">
+              <div class="font-extrabold text-slate-900 flex items-center justify-between">
+                <span>토론자: ${m.name} <span class="text-[10px] text-slate-400 font-normal">(${m.stance}, ${m.assignedVal})</span></span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] text-amber-600 font-bold">득표 ${myVotes}표</span>
+                  <span class="text-emerald-700 font-bold">질문 ${list.length}건</span>
+                </div>
+              </div>
+          `;
+          if (list.length === 0) {
+            html += `<p class="text-[11px] text-slate-400 pl-2">· 기록된 질문 없음</p>`;
+          } else {
+            list.forEach((qa) => {
+              html += `
+                <div class="pl-3 py-1 border-l-2 border-emerald-500 text-[11px] text-slate-700">
+                  <strong>[질문자: ${qa.questionerName}]</strong> Q. ${qa.question}
+                </div>
+              `;
+            });
+          }
+          html += `</div>`;
+        });
+
+        html += `</div></div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function exportTeacherCsv() {
+      let csvContent = "\uFEFF학급,모둠,토론자,입장,배정가치,베스트토론자득표수,질문자,질문내용\n";
+      const classGroups = CLASS_DATA[state.className].groups;
+
+      Object.keys(classGroups).forEach(gKey => {
+        const storageKey = `debate_qa_final_${state.className}_${gKey}`;
+        const raw = localStorage.getItem(storageKey);
+        let gData = raw ? JSON.parse(raw) : { members: classGroups[gKey], qaMap: {}, votes: {} };
+        
+        const voteCounts = {};
+        gData.members.forEach(m => { voteCounts[m.name] = 0; });
+        Object.values(gData.votes || {}).forEach(nominee => {
+          if (voteCounts[nominee] !== undefined) voteCounts[nominee]++;
+        });
+
+        gData.members.forEach(m => {
+          const list = (gData.qaMap && gData.qaMap[m.name]) || [];
+          const votes = voteCounts[m.name] || 0;
+          if (list.length === 0) {
+            csvContent += `"${state.className}","${gKey}","${m.name}","${m.stance}","${m.assignedVal}","${votes}","",""\n`;
+          } else {
+            list.forEach(qa => {
+              csvContent += `"${state.className}","${gKey}","${m.name}","${m.stance}","${m.assignedVal}","${votes}","${qa.questionerName}","${qa.question.replace(/"/g, '""')}"\n`;
+            });
+          }
+        });
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `최종토론질문및투표수합_${state.className}.csv`;
+      a.click();
+    }
+
+    function printTeacherReport() {
+      window.print();
+    }
+  </script>
+</body>
+</html>
